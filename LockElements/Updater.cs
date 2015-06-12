@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autodesk.Revit.DB;
 
 
@@ -49,7 +45,10 @@ namespace LockElements
             Document doc = data.GetDocument();
             foreach (ElementId deletedElementId in data.GetDeletedElementIds())
             {
-                // TODO: Provide logic for checking ids
+                if(!ExtensibleStorageUtils.IsLocked(doc, deletedElementId)) continue;
+                FailureMessage failureMessage = new FailureMessage(_failureDefinitionId);
+                failureMessage.SetFailingElement(deletedElementId);
+                doc.PostFailure(failureMessage);
             }
         }
 

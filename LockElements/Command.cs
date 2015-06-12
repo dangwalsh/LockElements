@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Selection;
 using Utils;
 
 namespace LockElements
@@ -18,17 +12,14 @@ namespace LockElements
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
 
-            // TODO: move all method declarations out of this class
-            IList<Reference> references = null;
-
             try
             {
+#if DEBUG
                 ConsoleManager.Show();
+#endif
                 Console.WriteLine("info:\tLaunched Command");
 
-                var selection = uidoc.Selection;
-                references = selection.PickObjects(ObjectType.Element,
-                    @"Choose elements you would like to lock. Click FINISH to complete.");
+                Controller.GetUserSelection(uidoc);
 
                 return Result.Succeeded;
             }
@@ -39,12 +30,6 @@ namespace LockElements
 
                 return Result.Failed;
             }
-
-            if (null == references) return Result.Succeeded;
-
-            // TODO: logic for adding newly selected elements to DataStorage goes here
-            // either iterate collection and call utility methods
-            // or send colection to utility methods
         }
     }
 }

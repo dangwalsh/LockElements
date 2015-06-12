@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.ExtensibleStorage;
 using Autodesk.Revit.UI;
@@ -11,19 +8,13 @@ namespace LockElements
 {
     class ExtensibleStorageUtils
     {
-        /********
-         * 
-         * Methods to assist with creating DataStorage and populating with data
-         * 
-         */
+        private static string s_applicationVersion = "ApplicationVersion";
+        private static string s_lastUsed = "LastUsed";
+        private static String s_elementsToLock = "ElementsToLock";
 
-        /// <summary>
-        /// Gets or creates the schema for storing specific results
-        /// </summary>
-        /// <returns></returns>
-        private static Schema GetOrCreateSeparateResultsSchema()
+        private static Schema GetOrCreateLockSchema()
         {
-            Guid guid = new Guid("9FB88EA6-BAC0-44B8-87C1-BC59BF03E36B");
+            Guid guid = new Guid("12491EDC-9B7C-4150-B8B6-0245BB791C3D");
 
             Schema schema = Schema.Lookup(guid);
 
@@ -31,43 +22,59 @@ namespace LockElements
                 return schema;
 
             SchemaBuilder sb = new SchemaBuilder(guid);
-            sb.SetSchemaName("WSAddInStoredResults");
+            sb.SetSchemaName("WSAPIAddInInfo");
             sb.AddSimpleField(s_applicationVersion, typeof(string));
             sb.AddSimpleField(s_lastUsed, typeof(string));
-            sb.AddSimpleField(s_categoryId, typeof(ElementId));
-            sb.AddArrayField(s_elementsToReview, typeof(ElementId));
+            sb.AddArrayField(s_elementsToLock, typeof(string));
             schema = sb.Finish();
 
             return schema;
         }
 
-        private static Entity GenerateSeparateResultsEntity(Document doc, ElementId categoryId)
+        private static DataStorage FindDataStorageElement(Document doc, Schema schema)
         {
-            Schema schema = GetOrCreateSeparateResultsSchema();
-
             FilteredElementCollector collector = new FilteredElementCollector(doc);
-            collector.OfCategoryId(categoryId);
-            collector.WhereElementIsNotElementType();
+            collector.OfClass(typeof(DataStorage));
+            collector.WherePasses(new ExtensibleStorageFilter(schema.GUID));
 
-            List<ElementId> elementIdsToTrack = new List<ElementId>();
-            foreach (ElementId elementId in collector.ToElementIds())
+            return collector.FirstElement() as DataStorage;
+        }
+
+        private static Entity GenerateResultsEntity(Document doc, Schema schema, DataStorage dse, List<string> elementList)
+        {
+            IList<string> ids = GetElementElementIdList(dse, schema);
+
+            foreach (var element in elementList)
             {
-                if (ShouldTrackElement(doc, elementId))
-                    elementIdsToTrack.Add(elementId);
+                if (!ids.Contains(element))
+                    ids.Add(element);
             }
 
             Entity entity = new Entity(schema);
             entity.Set<string>(s_applicationVersion, "1.0.0.0");
             entity.Set<string>(s_lastUsed, DateTime.Now.ToLongTimeString());
-            entity.Set<ElementId>(s_categoryId, categoryId);
-            entity.Set<IList<ElementId>>(s_elementsToReview, elementIdsToTrack);
+            entity.Set<IList<string>>(s_elementsToLock, ids);
 
             return entity;
         }
 
-        private static void AddOrUpdateSeparateResultsElement(Document doc, ElementId categoryId)
+        public static List<string> CreateElementIdList(Document doc, IEnumerable<ElementId> elementIds)
         {
-            DataStorage dse = FindSeparateResultsElement(doc, categoryId);
+            List<string> elementList = new List<string>();
+            foreach (var elementId in elementIds)
+            {
+                AttemptToCheckoutInAdvance(doc, elementId);
+                elementList.Add(elementId.ToString());
+            }
+
+            return elementList;
+        }
+
+        public static void AddOrUpdateElements(Document doc, IEnumerable<ElementId> elementIds)
+        {
+            List<string> elementList = CreateElementIdList(doc, elementIds);
+            Schema schema = GetOrCreateLockSchema();
+            DataStorage dse = FindDataStorageElement(doc, schema);
 
             using (Transaction t = new Transaction(doc, "Add or update separate results element"))
             {
@@ -75,65 +82,38 @@ namespace LockElements
                 if (dse == null)
                 {
                     dse = DataStorage.Create(doc);
-                    dse.Name = "Tracking for category id " + categoryId.IntegerValue;
+                    dse.Name = "Tracking for elements to be locked.";
                 }
-                Entity entity = GenerateSeparateResultsEntity(doc, categoryId);
+                Entity entity = GenerateResultsEntity(doc, schema, dse, elementList);
                 dse.SetEntity(entity);
                 t.Commit();
+
+                IList<string> ids = entity.Get<IList<string>>(s_elementsToLock);
+                String content = String.Format("info:\tDataStorage updated.\n\tTotal elements:\t{0}\n\tIds:\t{1}", ids.Count, String.Join("\n\t\t", ids));
+                Console.WriteLine(content);
             }
         }
 
-        private static DataStorage FindSeparateResultsElement(Document doc, ElementId categoryId)
+        public static void ShowResultsElement(Document doc)
         {
-            FilteredElementCollector collector = new FilteredElementCollector(doc);
-            collector.OfClass(typeof(DataStorage));
-            Schema schema = GetOrCreateSeparateResultsSchema();
-            collector.WherePasses(new ExtensibleStorageFilter(schema.GUID));
-
-            foreach (DataStorage dse in collector.Cast<DataStorage>())
-            {
-                Entity entity = dse.GetEntity(schema);
-                if (entity != null)
-                {
-                    ElementId storedCategoryId = entity.Get<ElementId>(s_categoryId);
-
-                    if (categoryId == storedCategoryId)
-                    {
-                        return dse;
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        /****************
-         * 
-         * Methods to assist with removing accessing data from DataStorage
-         * 
-         */
-
-        private static void ShowSeparateResultsElement(Document doc, ElementId categoryId)
-        {
-            DataStorage dse = FindSeparateResultsElement(doc, categoryId);
-            String label = "Results element for " + GetCategoryString(doc, categoryId);
+            Schema schema = GetOrCreateLockSchema();
+            DataStorage dse = FindDataStorageElement(doc, schema);
+            String label = "Results element for locked elements:";
             if (dse != null)
             {
                 TaskDialog ts = new TaskDialog("Results element");
                 ts.MainInstruction = label;
 
-                Schema schema = GetOrCreateSeparateResultsSchema();
                 Entity entity = dse.GetEntity(schema);
-                IList<ElementId> ids = entity.Get<IList<ElementId>>(s_elementsToReview);
+                IList<string> ids = entity.Get<IList<string>>(s_elementsToLock);
 
-                String content = String.Format("App version {0}\nUpdated {1}\nIds({2}):\n {3}",
+                String content = String.Format("App version {0}\nUpdated {1}\nIds({2}):\n{3}",
                                                entity.Get<String>(s_applicationVersion),
                                                entity.Get<String>(s_lastUsed),
                                                ids.Count,
-                                               String.Join(",\n", ids));
+                                               String.Join("\n", ids));
 
                 ts.MainContent = content;
-
                 ts.Show();
             }
             else
@@ -142,11 +122,50 @@ namespace LockElements
             }
         }
 
-        private static String GetCategoryString(Document doc, ElementId categoryId)
+        public static IList<string> GetElementElementIdList(DataStorage dse, Schema schema)
         {
-            Category cat = doc.Settings.Categories.get_Item((BuiltInCategory)categoryId.IntegerValue);
+            IList<string> ids = null;
+            Entity existEntity = dse.GetEntity(schema);
 
-            return cat.Name;
+            if (existEntity.IsValid())
+                ids = existEntity.Get<IList<string>>(s_elementsToLock);
+            else
+                ids = new List<string>();
+
+            return ids;
+        }
+
+        public static void AttemptToCheckoutInAdvance(Document doc, ElementId elementId)
+        {
+            // Checkout attempt
+            //ICollection<ElementId> checkedOutIds = new List<ElementId>();
+            ICollection<ElementId> checkedOutIds = WorksharingUtils.CheckoutElements(doc, new ElementId[] { elementId });
+
+            // Confirm checkout
+            bool checkedOutSuccessfully = checkedOutIds.Contains(elementId);
+            if (!checkedOutSuccessfully)
+            {
+                throw new Exception("Cannot edit the Element - " +
+                                "it was not checked out successfully and may be checked out to another.");
+            }
+
+            // If element is updated in central or deleted in central, it is not editable
+            ModelUpdatesStatus updatesStatus = WorksharingUtils.GetModelUpdatesStatus(doc, elementId);
+            if (updatesStatus == ModelUpdatesStatus.DeletedInCentral || updatesStatus == ModelUpdatesStatus.UpdatedInCentral)
+            {
+                throw new Exception("Cannot edit the Element - " +
+                                "it is not up to date with central, but it is checked out.");
+            }
+        }
+
+        public static bool IsLocked(Document doc, ElementId elementId)
+        {
+            Schema schema = GetOrCreateLockSchema();
+            DataStorage dse = FindDataStorageElement(doc, schema);
+
+            IList<string> uids = GetElementElementIdList(dse, schema);
+
+            return uids.Contains(elementId.ToString());
         }
     }
 }

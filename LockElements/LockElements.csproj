@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Application.cs" />
     <Compile Include="Command.cs" />
+    <Compile Include="Controller.cs" />
     <Compile Include="ExtensibleStorageUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Updater.cs" />
