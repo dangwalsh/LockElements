@@ -37,7 +37,7 @@ namespace LockElements
             _failureDefinitionId = new FailureDefinitionId(new Guid("257426D2-4D62-4DFB-81E0-CB18A3AFEDEA"));
             FailureDefinition failureDefinition = 
                 FailureDefinition.CreateFailureDefinition(_failureDefinitionId,
-                FailureSeverity.Error, @"Locked: element cannot be deleted.");
+                FailureSeverity.Error, "This element has been locked. Please contact a project leader if you need to delete it.");
         }
 
         public void Execute(UpdaterData data)

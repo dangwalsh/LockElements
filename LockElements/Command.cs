@@ -1,6 +1,6 @@
 ﻿using System;
 using Autodesk.Revit.UI;
-using Utils;
+
 
 namespace LockElements
 {
@@ -14,9 +14,6 @@ namespace LockElements
 
             try
             {
-#if DEBUG
-                ConsoleManager.Show();
-#endif
                 Console.WriteLine("info:\tLaunched Command");
 
                 Controller.GetUserSelection(uidoc);

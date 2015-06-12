@@ -51,7 +51,7 @@ namespace LockElements
             }
 
             Entity entity = new Entity(schema);
-            entity.Set<string>(s_applicationVersion, "1.0.0.0");
+            entity.Set<string>(s_applicationVersion, "0.0.0.1");
             entity.Set<string>(s_lastUsed, DateTime.Now.ToLongTimeString());
             entity.Set<IList<string>>(s_elementsToLock, ids);
 
@@ -63,7 +63,9 @@ namespace LockElements
             List<string> elementList = new List<string>();
             foreach (var elementId in elementIds)
             {
-                AttemptToCheckoutInAdvance(doc, elementId);
+                if (doc.IsWorkshared)
+                    AttemptToCheckoutInAdvance(doc, elementId);
+
                 elementList.Add(elementId.ToString());
             }
 
@@ -89,7 +91,10 @@ namespace LockElements
                 t.Commit();
 
                 IList<string> ids = entity.Get<IList<string>>(s_elementsToLock);
-                String content = String.Format("info:\tDataStorage updated.\n\tTotal elements:\t{0}\n\tIds:\t{1}", ids.Count, String.Join("\n\t\t", ids));
+                String content = String.Format("info:\tDataStorage updated {0}\n\tIds ({1}):\n\t{2}", 
+                                                entity.Get<String>(s_lastUsed),
+                                                ids.Count, 
+                                                String.Join("\n\t", ids));
                 Console.WriteLine(content);
             }
         }
@@ -98,21 +103,20 @@ namespace LockElements
         {
             Schema schema = GetOrCreateLockSchema();
             DataStorage dse = FindDataStorageElement(doc, schema);
-            String label = "Results element for locked elements:";
+            String label = "Command results:";
             if (dse != null)
             {
-                TaskDialog ts = new TaskDialog("Results element");
+                TaskDialog ts = new TaskDialog("Results");
                 ts.MainInstruction = label;
 
                 Entity entity = dse.GetEntity(schema);
                 IList<string> ids = entity.Get<IList<string>>(s_elementsToLock);
 
-                String content = String.Format("App version {0}\nUpdated {1}\nIds({2}):\n{3}",
+                String content = String.Format("Application version {0}\nUpdated {1}\n\nElementIds ({2}):\n\n{3}",
                                                entity.Get<String>(s_applicationVersion),
                                                entity.Get<String>(s_lastUsed),
                                                ids.Count,
-                                               String.Join("\n", ids));
-
+                                               String.Join("  ", ids));
                 ts.MainContent = content;
                 ts.Show();
             }
@@ -138,7 +142,6 @@ namespace LockElements
         public static void AttemptToCheckoutInAdvance(Document doc, ElementId elementId)
         {
             // Checkout attempt
-            //ICollection<ElementId> checkedOutIds = new List<ElementId>();
             ICollection<ElementId> checkedOutIds = WorksharingUtils.CheckoutElements(doc, new ElementId[] { elementId });
 
             // Confirm checkout

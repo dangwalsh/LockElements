@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 
@@ -6,7 +7,6 @@ namespace LockElements
 {
     public class Application : IExternalApplication
     {
-
         public Result OnShutdown(UIControlledApplication application)
         {
             Utils.ConsoleManager.Hide();
@@ -16,7 +16,9 @@ namespace LockElements
 
         public Result OnStartup(UIControlledApplication application)
         {
+#if DEBUG
             Utils.ConsoleManager.Show();
+#endif
             Console.WriteLine("info:\tLaunched Application");
 
             Updater updater = new Updater(application.ActiveAddInId);
@@ -37,10 +39,9 @@ namespace LockElements
 
         private void CreateTrigger<T>(Updater updater)
         {
-            var classFilter = new ElementClassFilter(typeof(T));
+            ElementClassFilter classFilter = new ElementClassFilter(typeof(T));
             UpdaterRegistry.AddTrigger(updater.GetUpdaterId(), classFilter, Element.GetChangeTypeElementDeletion());
             Console.WriteLine("info:\tCreated Trigger for " + typeof(T).Name);
-
         }
     }
 }
