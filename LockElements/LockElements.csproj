@@ -67,6 +67,7 @@
   <PropertyGroup>
     <PostBuildEvent>copy "$(ProjectDir)LockElements.addin" "$(AppData)\Autodesk\REVIT\Addins\2014"
 copy "$(ProjectDir)bin\debug\LockElements.dll" "$(AppData)\Autodesk\REVIT\Addins\2014"
+REM copy "$(ProjectDir)bin\release\LockElements.dll" "$(AppData)\Autodesk\REVIT\Addins\2014"
 copy "U:\src\github.com\dangwalsh\Utils\ConsoleManager\ConsoleManager\bin\Debug\Utils.ConsoleManager.dll" "$(AppData)\Autodesk\REVIT\Addins\2014"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

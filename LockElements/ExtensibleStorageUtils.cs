@@ -22,7 +22,7 @@ namespace LockElements
                 return schema;
 
             SchemaBuilder sb = new SchemaBuilder(guid);
-            sb.SetSchemaName("WSAPIAddInInfo");
+            sb.SetSchemaName("ElementLockInfo");
             sb.AddSimpleField(s_applicationVersion, typeof(string));
             sb.AddSimpleField(s_lastUsed, typeof(string));
             sb.AddArrayField(s_elementsToLock, typeof(string));
@@ -95,7 +95,9 @@ namespace LockElements
                                                 entity.Get<String>(s_lastUsed),
                                                 ids.Count, 
                                                 String.Join("\n\t", ids));
+#if DEBUG
                 Console.WriteLine(content);
+#endif
             }
         }
 

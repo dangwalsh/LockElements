@@ -14,8 +14,9 @@ namespace LockElements
 
             try
             {
+#if DEBUG
                 Console.WriteLine("info:\tLaunched Command");
-
+#endif
                 Controller.GetUserSelection(uidoc);
 
                 return Result.Succeeded;
@@ -23,8 +24,9 @@ namespace LockElements
             catch (Exception ex)
             {
                 message = ex.Message;
+#if DEBUG
                 Console.WriteLine("err:\t" + message);
-
+#endif
                 return Result.Failed;
             }
         }
