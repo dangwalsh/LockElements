@@ -13,7 +13,7 @@
     <Assembly>LockElements.dll</Assembly>
     <FullClassName>LockElements.Application</FullClassName>
     <ClientId>E423D6FF-B062-4FC1-9872-AC70B1655AC2</ClientId>
-    <VendorId>XXXX</VendorId>
-    <VendorDescription>Gensler</VendorDescription>
+    <VendorId>DGW</VendorId>
+    <VendorDescription>DGW</VendorDescription>
   </AddIn>
 </RevitAddIns>
