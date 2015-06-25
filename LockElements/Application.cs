@@ -17,7 +17,7 @@ namespace LockElements
         {
 #if DEBUG
             Utils.ConsoleManager.Show();
-            Console.WriteLine("info:\tLaunched Application");
+            System.Console.WriteLine("info:\tLaunched Application");
 #endif
             Updater updater = new Updater(application.ActiveAddInId);
             UpdaterRegistry.RegisterUpdater(updater);
@@ -40,7 +40,7 @@ namespace LockElements
             ElementClassFilter classFilter = new ElementClassFilter(typeof(T));
             UpdaterRegistry.AddTrigger(updater.GetUpdaterId(), classFilter, Element.GetChangeTypeElementDeletion());
 #if DEBUG
-            Console.WriteLine("info:\tCreated Trigger for " + typeof(T).Name);
+            System.Console.WriteLine("info:\tCreated Trigger for " + typeof(T).Name);
 #endif
         }
     }

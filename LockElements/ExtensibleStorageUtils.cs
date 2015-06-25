@@ -167,6 +167,7 @@ namespace LockElements
         {
             Schema schema = GetOrCreateLockSchema();
             DataStorage dse = FindDataStorageElement(doc, schema);
+            if (null == dse) return false;
 
             IList<string> uids = GetElementElementIdList(dse, schema);
 
