@@ -44,10 +44,27 @@ namespace LockElements
         {
             IList<string> ids = GetElementElementIdList(dse, schema);
 
-            foreach (var element in elementList)
+            if (!Controller.IsUnlock)
             {
-                if (!ids.Contains(element))
-                    ids.Add(element);
+                foreach (var element in elementList)
+                {
+                    if (!ids.Contains(element))
+                        ids.Add(element);
+                }
+            }
+            else
+            {
+                foreach (var element in elementList)
+                {
+                    IList<string> temp = new List<string>();
+                    foreach (var id in ids)
+                    {
+                        if (id == element)
+                            continue; 
+                        temp.Add(id);
+                    }
+                    ids = temp;
+                }
             }
 
             Entity entity = new Entity(schema);

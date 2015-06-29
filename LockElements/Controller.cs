@@ -8,7 +8,9 @@ namespace LockElements
 {
     public class Controller
     {
-        public static void GetUserSelection(UIDocument uidoc)
+        public static bool IsUnlock { get; set; }  
+
+        public static IList<ElementId> GetUserSelection(UIDocument uidoc)
         {
             IList<Reference> references = null;
             Document doc = uidoc.Document;
@@ -16,13 +18,15 @@ namespace LockElements
 
             references = selection.PickObjects(ObjectType.Element, "Choose elements you would like to lock. Click FINISH to complete.");
 
-            if (null == references) return; 
+            if (null == references) return null; 
 
             IList<ElementId> elementIds = references.Select(r => r.ElementId).ToList();
             elementIds = FilterByElementClass(doc, elementIds);
 
-            ExtensibleStorageUtils.AddOrUpdateElements(doc, elementIds);
-            ExtensibleStorageUtils.ShowResultsElement(doc);
+            return elementIds;
+
+            //ExtensibleStorageUtils.AddOrUpdateElements(doc, elementIds);
+            //ExtensibleStorageUtils.ShowResultsElement(doc);
         }
 
         private static IList<ElementId> FilterByElementClass(Document doc, IList<ElementId> elementIds)

@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>Application Updater</Name>
+    <Assembly>LockElements.dll</Assembly>
+    <FullClassName>LockElements.Application</FullClassName>
+    <ClientId>E423D6FF-B062-4FC1-9872-AC70B1655AC2</ClientId>
+    <VendorId>XXXX</VendorId>
+    <VendorDescription>Gensler</VendorDescription>
+  </AddIn>
+</RevitAddIns>

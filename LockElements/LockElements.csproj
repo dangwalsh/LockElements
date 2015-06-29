@@ -46,22 +46,25 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Utils.ConsoleManager">
+    <Reference Include="Utils.ConsoleManager, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Utils\ConsoleManager\ConsoleManager\bin\Debug\Utils.ConsoleManager.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Application.cs" />
-    <Compile Include="Command.cs" />
+    <Compile Include="CommandLock.cs" />
+    <Compile Include="CommandUnlock.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="ExtensibleStorageUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Updater.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="LockElements.addin">
+    <Content Include="LockElementsAdmin.addin">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="LockElementsUser.addin" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
