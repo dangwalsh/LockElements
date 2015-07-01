@@ -4,13 +4,13 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.ExtensibleStorage;
 using Autodesk.Revit.UI;
 
-namespace LockElements
+namespace Gensler
 {
-    class ExtensibleStorageUtils
+    static class ExtensibleStorageUtils
     {
-        private static string s_applicationVersion = "ApplicationVersion";
-        private static string s_lastUsed = "LastUsed";
-        private static String s_elementsToLock = "ElementsToLock";
+        private static string _applicationVersion = "ApplicationVersion";
+        private static string _lastUsed = "LastUsed";
+        private static String _elementsToLock = "ElementsToLock";
 
         private static Schema GetOrCreateLockSchema()
         {
@@ -23,9 +23,9 @@ namespace LockElements
 
             SchemaBuilder sb = new SchemaBuilder(guid);
             sb.SetSchemaName("ElementLockInfo");
-            sb.AddSimpleField(s_applicationVersion, typeof(string));
-            sb.AddSimpleField(s_lastUsed, typeof(string));
-            sb.AddArrayField(s_elementsToLock, typeof(string));
+            sb.AddSimpleField(_applicationVersion, typeof(string));
+            sb.AddSimpleField(_lastUsed, typeof(string));
+            sb.AddArrayField(_elementsToLock, typeof(string));
             schema = sb.Finish();
 
             return schema;
@@ -68,9 +68,9 @@ namespace LockElements
             }
 
             Entity entity = new Entity(schema);
-            entity.Set<string>(s_applicationVersion, "0.0.0.1");
-            entity.Set<string>(s_lastUsed, DateTime.Now.ToLongTimeString());
-            entity.Set<IList<string>>(s_elementsToLock, ids);
+            entity.Set<string>(_applicationVersion, "0.0.0.1");
+            entity.Set<string>(_lastUsed, DateTime.Now.ToLongTimeString());
+            entity.Set<IList<string>>(_elementsToLock, ids);
 
             return entity;
         }
@@ -107,9 +107,9 @@ namespace LockElements
                 dse.SetEntity(entity);
                 t.Commit();
 
-                IList<string> ids = entity.Get<IList<string>>(s_elementsToLock);
+                IList<string> ids = entity.Get<IList<string>>(_elementsToLock);
                 String content = String.Format("info:\tDataStorage updated {0}\n\tIds ({1}):\n\t{2}", 
-                                                entity.Get<String>(s_lastUsed),
+                                                entity.Get<String>(_lastUsed),
                                                 ids.Count, 
                                                 String.Join("\n\t", ids));
 #if DEBUG
@@ -129,11 +129,11 @@ namespace LockElements
                 ts.MainInstruction = label;
 
                 Entity entity = dse.GetEntity(schema);
-                IList<string> ids = entity.Get<IList<string>>(s_elementsToLock);
+                IList<string> ids = entity.Get<IList<string>>(_elementsToLock);
 
                 String content = String.Format("Application version {0}\nUpdated {1}\n\nElementIds ({2}):\n\n{3}",
-                                               entity.Get<String>(s_applicationVersion),
-                                               entity.Get<String>(s_lastUsed),
+                                               entity.Get<String>(_applicationVersion),
+                                               entity.Get<String>(_lastUsed),
                                                ids.Count,
                                                String.Join("  ", ids));
                 ts.MainContent = content;
@@ -151,7 +151,7 @@ namespace LockElements
             Entity existEntity = dse.GetEntity(schema);
 
             if (existEntity.IsValid())
-                ids = existEntity.Get<IList<string>>(s_elementsToLock);
+                ids = existEntity.Get<IList<string>>(_elementsToLock);
             else
                 ids = new List<string>();
 

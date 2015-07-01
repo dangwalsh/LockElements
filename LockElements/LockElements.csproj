@@ -8,8 +8,8 @@
     <ProjectGuid>{0D43C1B3-C1D5-4859-A56F-D64898D53874}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LockElements</RootNamespace>
-    <AssemblyName>LockElements</AssemblyName>
+    <RootNamespace>Gensler</RootNamespace>
+    <AssemblyName>Gensler.LockElements</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -58,19 +58,19 @@
     <Compile Include="Controller.cs" />
     <Compile Include="ExtensibleStorageUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SelectionFilter.cs" />
     <Compile Include="Updater.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="LockElementsAdmin.addin">
+    <Content Include="Gensler.LockElements.addin">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="LockElementsUser.addin" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(ProjectDir)LockElements.addin" "$(AppData)\Autodesk\REVIT\Addins\2014"
-copy "$(ProjectDir)bin\debug\LockElements.dll" "$(AppData)\Autodesk\REVIT\Addins\2014"
-REM copy "$(ProjectDir)bin\release\LockElements.dll" "$(AppData)\Autodesk\REVIT\Addins\2014"
+    <PostBuildEvent>copy "$(ProjectDir)Gensler.LockElements.addin" "$(AppData)\Autodesk\REVIT\Addins\2014"
+copy "$(ProjectDir)bin\debug\Gensler.LockElements.dll" "$(AppData)\Autodesk\REVIT\Addins\2014"
+REM copy "$(ProjectDir)bin\release\Gensler.LockElements.dll" "$(AppData)\Autodesk\REVIT\Addins\2014"
 copy "U:\src\github.com\dangwalsh\Utils\ConsoleManager\ConsoleManager\bin\Debug\Utils.ConsoleManager.dll" "$(AppData)\Autodesk\REVIT\Addins\2014"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

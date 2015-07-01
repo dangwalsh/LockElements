@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.DB;
 
-namespace LockElements
+namespace Gensler
 {
     [Autodesk.Revit.Attributes.Transaction(Autodesk.Revit.Attributes.TransactionMode.Manual)]
     public class CommandLock : IExternalCommand

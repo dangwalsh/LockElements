@@ -2,7 +2,7 @@
 using Autodesk.Revit.DB;
 
 
-namespace LockElements
+namespace Gensler
 {
     public class Updater : IUpdater
     {
